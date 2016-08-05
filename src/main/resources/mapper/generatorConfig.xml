@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <classPathEntry location="C:\Users\Administrator\.m2\repository\mysql\mysql-connector-java\5.1.34\mysql-connector-java-5.1.34.jar" />
+
+    <context id="DB2Tables" targetRuntime="MyBatis3">
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://192.168.150.120:3306/test?useUnicode=true&amp;characterEncoding=utf-8"
+                        userId="root"
+                        password="poi">
+        </jdbcConnection>
+
+        <javaTypeResolver >
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+        <!-- generate Model -->
+        <javaModelGenerator targetPackage="com.data.model" targetProject="D:\shanghai\new20160321\data_api\src\main\java">
+            <property name="enableSubPackages" value="true" />
+            <property name="trimStrings" value="true" />
+            <property name="rootInterface" value="java.io.Serializable"/>
+        </javaModelGenerator>
+
+
+        <!-- generate xml -->
+        <sqlMapGenerator targetPackage="mapper.data"  targetProject="D:\shanghai\new20160321\data_api\src\main\resources">
+            <property name="enableSubPackages" value="true" />
+        </sqlMapGenerator>
+
+        <!-- generate Mapper -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.data.mapper" targetProject="D:\shanghai\new20160321\data_api\src\main\java">
+            <property name="enableSubPackages" value="true" />
+        </javaClientGenerator>
+
+
+        <table schema="" tableName="geo"></table>
+        <table schema="" tableName="score"></table>
+    </context>
+</generatorConfiguration>

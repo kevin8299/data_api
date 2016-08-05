@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:oxm="http://www.springframework.org/schema/oxm"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+    http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.1.xsd">
+
+
+    <context:component-scan base-package="com.data"/>
+
+    <!-- mybatis文件配置，扫描所有mapper文件 -->
+    <!-- beware that mapper-config.xml is not needed if you use injected mappers -->
+    <bean id="manager-basic-sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="_manager-dataSource" />
+        <property name="mapperLocations" value="classpath:mapper/data/*.xml"/>
+    </bean>
+
+
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.data.mapper" />
+        <!-- optional unless there are multiple session factories defined -->
+        <property name="sqlSessionFactoryBeanName" value="manager-basic-sqlSessionFactoryBean" />
+    </bean>
+
+    <bean id="manager-stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+    </bean>
+
+    <bean id="_manager-dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://192.168.150.120:3306/test?useUnicode=true&amp;characterEncoding=utf-8" />
+        <property name="username" value="root" />
+        <property name="password" value="poi" />
+
+        <property name="maxActive" value="50" />
+        <property name="initialSize" value="20" />
+        <property name="minIdle" value="20" />
+        <property name="maxWait" value="10000" />
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <property name="validationQuery" value="SELECT 'x' FROM DUAL" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <property name="filters" value="slf4j,config" />
+        <property name="proxyFilters">
+            <list>
+                <ref bean="manager-stat-filter" />
+            </list>
+        </property>
+
+        <property name="connectionProperties" value="config.decrypt=false" />
+    </bean>
+
+    <bean id="manager-transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="_manager-dataSource" />
+    </bean>
+
+    <!-- 使用annotation定义事务 -->
+    <!-- 配置事务特性 -->
+    <tx:advice id="manager-tx-advice" transaction-manager="manager-transactionManager">
+        <tx:attributes>
+            <tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="insert*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="del*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="remove*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="edit*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="batch*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="load*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="rest*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="*" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 配置哪些类的方法需要进行事务管理 -->
+    <aop:config>
+        <aop:advisor pointcut="execution(* com.data.service..*Service.*(..))" advice-ref="manager-tx-advice" />
+    </aop:config>
+
+
+</beans>
